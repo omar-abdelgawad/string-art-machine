@@ -8,155 +8,56 @@ that it needs 1200*64 = 76,800 step for a full revolution, and he gave
 nail
 */
 #define NUMBER_OF_NAILS 256
-
-#define STEP_MICROSECONDS 700
-#define STEPS_PER_NAIL 300
+#define STEP_MICROSECONDS 200
+#define GEAR_RATIO 6
+#define MICRO_STEPPING_FACTOR 16
+const int STEPS_PER_NAIL = (200*GEAR_RATIO*MICRO_STEPPING_FACTOR)/NUMBER_OF_NAILS;
 
 #define STEP_PIN 5
-#define DIR_PIN 4
-
+#define DIR_PIN 3
 #define Servo_pin 6
 
-const int NAIL_LIST[] = {};
+const int NAIL_LIST[] = { 64,0};
 
 int g_previous_nail = 0;
-int g_opposing_nail = 128;
 int g_steps = 0;
 bool g_drawing_done = false;
 
-void setup()
-{
+void setup() {
   initializeNeedleServo();
-  pinMode(STEP_PIN, OUTPUT);
-  pinMode(DIR_PIN, OUTPUT);
+  initializeStepperPins();
+  digitalWrite(DIR_PIN, HIGH);
+  Serial.begin(9600);
+  Serial.println("f setup");
+  delay(3000);
 }
 
-void loop()
-{
-  if (!g_drawing_done)
-  {
-    for (int current_nail : NAIL_LIST)
-    {
-      if (g_previous_nail <= 127)
-      {
-        if ((g_previous_nail < current_nail) && (g_opposing_nail > current_nail))
-        {
-          digitalWrite(DIR_PIN, LOW);
-          g_steps = (current_nail - g_previous_nail) * STEPS_PER_NAIL;
-          goToNextNail();
-
-          // Needing to make it rotate backward a little bit?? may be.
-          delay(1000);
-          needleBackwards();
-          delay(1000);
-          moveOneNail();
-          delay(1000);
-          needleForwards();
-          delay(1000);
-
-          g_previous_nail = current_nail;
-          g_opposing_nail = (g_previous_nail + 128) % 256;
-        }
-        else
-        {
-          if (g_previous_nail > current_nail)
-          {
-            digitalWrite(DIR_PIN, HIGH);
-            g_steps = (g_previous_nail - current_nail) * STEPS_PER_NAIL;
-            goToNextNail();
-
-            // Needing to make it rotate backward a little bit?? may be.
-            delay(100);
-            needleBackwards();
-            delay(1000);
-            moveOneNail();
-            delay(1000);
-            needleForwards();
-            delay(1000);
-
-            g_previous_nail = current_nail;
-            g_opposing_nail = (g_previous_nail + 128) % 256;
-          }
-          else
-          {
-            digitalWrite(DIR_PIN, HIGH);
-            g_steps = (128 - (current_nail - g_opposing_nail)) * STEPS_PER_NAIL;
-            goToNextNail();
-
-            // Needing to make it rotate backward a little bit?? may be.
-            delay(100);
-            needleBackwards();
-            delay(1000);
-            moveOneNail();
-            delay(1000);
-            needleForwards();
-            delay(1000);
-
-            g_previous_nail = current_nail;
-            g_opposing_nail = (g_previous_nail + 128) % 256;
-          }
-        }
+void loop() {
+  if (!g_drawing_done) {
+    for (int current_nail : NAIL_LIST) {
+      Serial.println(current_nail);
+      int dist_in_clockwise_dir = (current_nail - g_previous_nail + NUMBER_OF_NAILS) % NUMBER_OF_NAILS;
+      if (dist_in_clockwise_dir < NUMBER_OF_NAILS / 2) {
+        // rotate canvas clockwise
+        Serial.println("CW");
+        digitalWrite(DIR_PIN, HIGH);
+        g_steps = (dist_in_clockwise_dir - 1)*STEPS_PER_NAIL;
+      } else {
+        // rotate canvase counterclockwise
+        Serial.println("CCW");
+        digitalWrite(DIR_PIN, LOW);
+        g_steps = (NUMBER_OF_NAILS - dist_in_clockwise_dir - 1)*STEPS_PER_NAIL;
       }
-      else
-      {
-        if ((g_opposing_nail < current_nail) && (g_previous_nail > current_nail))
-        {
-          digitalWrite(DIR_PIN, HIGH);
-          g_steps = (g_previous_nail - current_nail) * STEPS_PER_NAIL;
-          goToNextNail();
-
-          // Needing to make it rotate backward a little bit?? may be.
-          delay(1000);
-          needleBackwards();
-          delay(1000);
-          moveOneNail();
-          delay(1000);
-          needleForwards();
-          delay(1000);
-
-          g_previous_nail = current_nail;
-          g_opposing_nail = (g_previous_nail + 128) % 256;
-        }
-        else
-        {
-          if (current_nail > g_previous_nail)
-          {
-            digitalWrite(DIR_PIN, LOW);
-            g_steps = (current_nail - g_previous_nail) * STEPS_PER_NAIL;
-            goToNextNail();
-
-            // Needing to make it rotate backward a little bit?? may be.
-            delay(1000);
-            needleBackwards();
-            delay(1000);
-            moveOneNail();
-            delay(1000);
-            needleForwards();
-            delay(1000);
-
-            g_previous_nail = current_nail;
-            g_opposing_nail = (g_previous_nail + 128) % 256;
-          }
-          else
-          {
-            digitalWrite(DIR_PIN, HIGH);
-            g_steps = (128 - (g_opposing_nail - current_nail)) * STEPS_PER_NAIL;
-            goToNextNail();
-
-            // Needing to make it rotate backward a little bit?? may be.
-            delay(1000);
-            needleBackwards();
-            delay(1000);
-            moveOneNail();
-            delay(1000);
-            needleForwards();
-            delay(1000);
-
-            g_previous_nail = current_nail;
-            g_opposing_nail = (g_previous_nail + 128) % 256;
-          }
-        }
-      }
+      goToNextNail();
+      // Needing to make it rotate backward a little bit?? may be.
+      delay(1000);
+      needleBackwards();
+      delay(1000);
+      moveOneNail();
+      delay(1000);
+      needleForwards();
+      delay(1000);
+      g_previous_nail = current_nail;
     }
   }
   g_drawing_done = true;
