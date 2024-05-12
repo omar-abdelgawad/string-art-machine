@@ -1,21 +1,22 @@
 #include <Servo.h>
-Servo Nedil_Servo;
+Servo g_NeedleServo;
+/*
+Initializes Servo motor (Needle Servo) State.
+*/
+void initializeNeedleServo() {
+  g_NeedleServo.attach(Servo_pin);
+}
 
 /*
 Moves the needle backwards (out of the canvas).
 */
 void needleBackwards() {
-  Nedil_Servo.write(0);
+  g_NeedleServo.write(0);
 }
+
 /*
 Moves the needle Forwards (into the canvas).
 */
 void needleForwards() {
-  Nedil_Servo.write(90);
-}
-/*
-Initializes Servo motor (Needle Servo) State.
-*/
-void initializeNeedleServo() {
-  Nedil_Servo.attach(Servo_pin);
+  g_NeedleServo.write(90);
 }
