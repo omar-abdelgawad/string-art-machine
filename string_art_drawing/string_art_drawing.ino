@@ -32,7 +32,7 @@ void setup() {
   initializeStepperPins();
   Serial.begin(9600);
   Serial.println("f setup");
-  delay(3000);
+  // delay(3000);
 }
 
 void loop() {
