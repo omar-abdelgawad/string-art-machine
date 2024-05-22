@@ -14,7 +14,7 @@ that it needs 1200*64 = 76,800 step for a full revolution, and he gave
 nail
 */
 #define NUMBER_OF_NAILS 256
-#define STEP_MICROSECONDS 200
+#define STEP_MICROSECONDS 1500
 #define GEAR_RATIO 6
 #define MICRO_STEPPING_FACTOR 16
 const int STEPS_PER_NAIL = (200 * GEAR_RATIO * MICRO_STEPPING_FACTOR) / NUMBER_OF_NAILS;
@@ -41,13 +41,13 @@ void loop() {
     for (int current_nail : NAIL_LIST) {
       goToNextNail(previous_nail, current_nail);
       // Needing to make it rotate backward a little bit?? may be.
-      delay(1000);
-      needleBackwards();
-      delay(1000);
-      moveOneNail();
-      delay(1000);
-      needleForwards();
-      delay(1000);
+      // delay(1000);
+      // needleBackwards();
+      // delay(1000);
+      // moveOneNail();
+      // delay(1000);
+      // needleForwards();
+      // delay(1000);
       previous_nail = current_nail;
     }
   }
